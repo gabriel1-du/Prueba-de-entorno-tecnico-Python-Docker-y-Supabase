@@ -1,0 +1,20 @@
+name: Comprobar Construccion de Docker
+
+# Instrucciones de activacion (cuando se haga push)
+on:
+  push:
+    branches: [ "main", "master" ] # Se activa cuando subes código a la rama principal
+
+# Pasos a seguir
+jobs:
+  build:
+    runs-on: ubuntu-latest # El robot usará un servidor con Linux (Ubuntu)
+
+    steps:
+    # Paso A: El robot descarga tu código desde tu repositorio
+    - name: Obtener el código
+      uses: actions/checkout@v3
+
+    # Paso B: El robot intenta armar la caja fuerte usando tu Dockerfile
+    - name: Construir imagen de Docker
+      run: docker build -t mi-app-nube .
