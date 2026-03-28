@@ -77,6 +77,7 @@ Seguido de aquello, en el directorio principal (la raíz de la carpeta que cream
 En otras palabras, este archivo vendría siendo las instrucciones de arranque. Una vez creado el archivo, copia y pega este código:
 
 Dockerfile
+```dockerfile
 # 1. IMAGEN BASE: Traemos un sistema operativo (Linux) ligero que ya trae Python 3.10 instalado.
 # De esta manera prevenimos que el sistema no tenga python.
 FROM python:3.10-slim
@@ -102,10 +103,8 @@ EXPOSE 10000
 # 7. COMANDO DE EJECUCIÓN: El comando exacto que encenderá el servidor cuando el contenedor se despierte.
 # Por qué: Usa Uvicorn para correr el archivo main.py en el puerto 10000, accesible desde cualquier IP (0.0.0.0).
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
-Con este archivo lo que hacemos es que cada vez que arranquemos con docker siga estas instrucciones. Al final dice que iniciará en el puerto localhost:10000 (puedes cambiarlo a preferencia).
-
 <img width="301" height="285" alt="Foto6" src="https://github.com/user-attachments/assets/0bfa7613-2629-4d62-aad4-5a632aad5234" />
-
+```
 
 4. Escribir el código y empaquetar la aplicación
 Ahora que tenemos nuestras herramientas instaladas, vamos a escribir nuestra primera API. En la raíz de tu proyecto (al mismo nivel que tu Dockerfile y requirements.txt), crea un nuevo archivo llamado main.py y copia exactamente el siguiente código:
