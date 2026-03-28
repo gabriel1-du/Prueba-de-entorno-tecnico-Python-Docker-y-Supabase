@@ -417,4 +417,16 @@ python -m venv venv
 Instalar dependencias: Descarga exactamente las mismas versiones que tú usaste:
 pip install -r requirements.txt
 
-¡Y listo! Ya puede ejecutar el código y el entorno funcionará exactamente igual que en tu computador.
+# Conclusión y Justificación de tecnologías usadas
+
+Las tecnologías usadas en este ejemplo son de gran ayuda si lo que se quiere tener un sistema automatizado en la nube o como puede ser sistemas de ia.
+
+Pyhton es un lenguaje con un gran soporte de librerías para distintas areas , si fuera enfocado a la ia librerías como Pytorch o para operaciones matemáticas como lo puede sympy contiene gran de código para optimizar trabajo.
+
+Supabase es una base de datos relacional con el motor de Postgres, un motor de codigo abierto , flexible y barato, lo necesario para trabajar con sistemas de esta naturaleza. Ademas tiene la opción de usar vectores que para la ia son claves (los vectores a grabdes rasgos son convertidores de texto a numéricos).
+
+Docker ayuda a la portabilidad de sistmas en la nube , garantiza que el sistema no sufra inconsistencias de arranque o de entorno independiente la nube que se corra.
+
+Github Actions ayuda prevenir subida de código que perjudique rendimiento, es como un filtro de calidad.
+
+Todas estas herramientas son de gran ayuda si es que de quiere tener un sistema automatizado, en otras palabras se vuelve indispensables si se quiere buen rendimiento.
