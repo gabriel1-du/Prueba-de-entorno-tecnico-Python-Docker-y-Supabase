@@ -18,7 +18,7 @@ En tu escritorio (o en la ubicación de tu sistema que prefieras), crea una nuev
 
 Dentro de Visual Studio Code, abre una nueva terminal (en este caso utilizaremos PowerShell) y escribe el siguiente comando:
 
-```powershell
+powershell
 python -m venv venv
 Nota: Asegúrate de no poner un punto antes de la palabra python.
 
