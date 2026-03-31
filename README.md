@@ -12,7 +12,7 @@ Antes de iniciar, es indispensable que tengas instalado y tener conocimientos b�
 
 ---
 
-[Ir a integraci처n de IA ](#parte-2-integraci처n-de-inteligencia-artificial-i)
+[Ir a integraci처n de IA ](#parte-2-integraci처n-de-inteligencia-artificial-ia)
 
 ## 1. Creaci처n de la carpeta del proyecto e iniciar entorno
 
