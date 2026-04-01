@@ -1,4 +1,4 @@
-# Guía de Entornos Virtuales, Docker y Supabase con FastAPI
+# Guía de Entornos Virtuales, Docker , Supabase con FastAPI y integracion de una ia (Azure)
 
 En este repositorio se encuentra un proyecto que configura un entorno virtual y un contenedor para ejecutar una API conectada a una base de datos en Supabase. El objetivo de esta guía es mostrar, con fines de aprendizaje, los pasos para introducirse en el trabajo con entornos de desarrollo aislados y despliegue de aplicaciones.
 
@@ -11,6 +11,8 @@ Antes de iniciar, es indispensable que tengas instalado y tener conocimientos b�
 * El navegador web de tu preferencia
 
 ---
+
+[Ir a integración de IA ](#parte-2-integración-de-inteligencia-artificial-ia)
 
 ## 1. Creación de la carpeta del proyecto e iniciar entorno
 
@@ -430,3 +432,147 @@ Docker ayuda a la portabilidad de sistmas en la nube , garantiza que el sistema 
 Github Actions ayuda prevenir subida de código que perjudique rendimiento, es como un filtro de calidad.
 
 Todas estas herramientas son de gran ayuda si es que de quiere tener un sistema automatizado, en otras palabras se vuelve indispensables si se quiere buen rendimiento.
+
+
+# PARTE 2: Integración de Inteligencia Artificial (IA)
+
+En esta sección documentaremos los pasos para integrar un modelo de Inteligencia Artificial (en este caso, la tecnología fundacional detrás de ChatGPT: `gpt-4o-mini`). Para lograr esto, utilizaremos la infraestructura en la nube de Microsoft Azure a través de GitHub Models.
+
+## Explicación de la Arquitectura: Azure + GitHub
+La infraestructura computacional (los servidores físicos, las tarjetas gráficas y las librerías de código) es proveída por **Microsoft Azure**. Sin embargo, utilizamos GitHub como intermediario para autenticarnos de manera rápida y gratuita, usando un token de acceso en lugar de configurar tarjetas de crédito en la nube.
+
+---
+
+### 1. Obtener el Token de Acceso de GitHub (Llave Maestra)
+
+El primer paso es generar una credencial para que nuestro código tenga permiso de usar la IA. 
+
+Dirígete a tu cuenta de GitHub, entra a **Settings** (Configuración) y, en el menú lateral izquierdo, baja hasta la última opción: **Developer settings** (Opciones de desarrollador).
+
+<img width="1230" height="551" alt="Developer Settings" src="https://github.com/user-attachments/assets/beb42012-4a24-4ba1-ae73-b40f906d1116" />
+
+Una vez ahí, despliega el menú **Personal access tokens** y selecciona la opción **Tokens (classic)**.
+
+<img width="525" height="256" alt="Personal acces key (Tokken clascs)" src="https://github.com/user-attachments/assets/6e4480b9-e480-4763-8104-aa72c7380820" />
+
+Después, presiona el botón superior derecho **Generate new token** y elige **Generate new token (classic)**.
+
+<img width="976" height="505" alt="Generar Tokem classis" src="https://github.com/user-attachments/assets/fe28efe6-5f97-48fe-9711-173f2219e2bd" />
+
+Asígnale un nombre descriptivo en el campo "Note" (por ejemplo, "Token-IA"). Para usar los modelos de IA **no es necesario marcar ninguna casilla de permisos**. Simplemente baja hasta el final de la página y haz clic en el botón verde para crearla.
+
+<img width="865" height="513" alt="Generacion de tokensubmit" src="https://github.com/user-attachments/assets/666a180a-4b2e-4c5f-bd0f-18f3b226856d" />
+
+Una vez generada, **copia la llave que aparece en pantalla inmediatamente** y guárdala en un lugar seguro, ya que GitHub no te la volverá a mostrar por motivos de seguridad.
+
+<img width="845" height="377" alt="Generacion de tokens" src="https://github.com/user-attachments/assets/5ef621d3-d228-42db-90e8-6fc417ca5d3f" />
+
+---
+
+### 2. Guardar la llave en el archivo `.env`
+
+Por seguridad, nunca debemos pegar esta llave directamente en nuestro código. En su lugar, abrimos nuestro archivo oculto `.env` y creamos una nueva variable llamada `GITHUB_TOKEN` para almacenar la llave recién copiada.
+
+<img width="554" height="189" alt="Env" src="https://github.com/user-attachments/assets/dd9c58c7-3998-4607-9a45-79d78ef7e252" />
+
+---
+
+### 3. Instalación de Librerías
+
+Para que Python pueda comunicarse con los servidores de Azure, necesitamos instalar la librería oficial. Abre tu terminal (asegurándote de que tu entorno virtual `venv` esté activo) y ejecuta el comando de instalación.
+
+<img width="910" height="200" alt="InstalamosAzure" src="https://github.com/user-attachments/assets/c84d4fcf-59af-4bed-983d-d47b414736d4" />
+
+> **Importante:** Recuerda ejecutar `pip freeze > requirements.txt` después de instalar la librería para que el registro de dependencias de tu proyecto se mantenga actualizado.
+
+---
+
+### 4. Creación del Endpoint hacia la IA
+
+Ahora integraremos el cliente de IA en nuestro archivo principal. Modifica tu `main.py` para que quede con la siguiente estructura. Este código añade un nuevo "endpoint" (ruta) que recibirá las preguntas y las enviará a la IA:
+
+```python
+from fastapi import FastAPI
+import requests
+import os
+from dotenv import load_dotenv
+
+# Importaciones para la IA de GitHub/Azure
+from azure.ai.inference import ChatCompletionsClient
+from azure.core.credentials import AzureKeyCredential
+
+# 1. CARGA SEGURA: Esto asegura que Python encuentre el .env sin importar desde dónde inicies el servidor
+base_dir = os.path.dirname(__file__)
+env_path = os.path.join(base_dir, '.env')
+load_dotenv(dotenv_path=env_path)
+
+# Iniciamos la app
+app = FastAPI()
+
+# Guardamos el token de nuestro entorno
+token_github = os.getenv("GITHUB_TOKEN")
+
+# 2. VALIDACIÓN: Verificamos si el token existe antes de intentar conectarnos
+if not token_github:
+    print("⚠️ ADVERTENCIA: No se encontró GITHUB_TOKEN en el archivo .env")
+    client_ia = None # Lo dejamos nulo para que no rompa el programa al arrancar
+else:
+    client_ia = ChatCompletionsClient(
+        endpoint="[https://models.inference.ai.azure.com](https://models.inference.ai.azure.com)",
+        credential=AzureKeyCredential(token_github)
+    )
+
+# ---> RUTA A: Base de Datos Supabase (Personajes)
+@app.get("/api/personajes")
+def obtener_personajes():
+    url_supabase = f"{os.getenv('SUPABASE_URL')}/rest/v1/PERSONAJE"
+    mi_llave = os.getenv("SUPABASE_KEY")
+    
+    cabeceras = {
+        "apikey": mi_llave,
+        "Authorization": f"Bearer {mi_llave}"
+    }
+    
+    respuesta = requests.get(url_supabase, headers=cabeceras)
+    return respuesta.json()
+
+# ---> RUTA B: Inteligencia Artificial
+@app.get("/api/ia/preguntar")
+def preguntar_ia(pregunta: str):
+    # Si la validación del token falló arriba, avisamos al usuario aquí
+    if not client_ia:
+        return {"error": "El cliente de IA no está configurado. Revisa tu GITHUB_TOKEN en el archivo .env"}
+    
+    try:
+        # Enviamos la consulta al modelo
+        response = client_ia.complete(
+            messages=[
+                {"role": "system", "content": "Eres un asistente experto en ingeniería y tecnología."},
+                {"role": "user", "content": pregunta},
+            ],
+            model="gpt-4o-mini"
+        )
+        return {"respuesta": response.choices[0].message.content}
+    except Exception as e:
+        # Capturamos cualquier error de conexión o de la API
+        return {"error": str(e)}
+
+```
+
+###5. Explicación del Flujo de Código
+Ruta absoluta al .env: Forzamos la lectura del archivo .env ubicando su directorio exacto para evitar errores de variables nulas al ejecutar la API desde distintos entornos (como Docker).
+
+Sistema a prueba de fallos: Verificamos si la llave GITHUB_TOKEN se leyó correctamente. Si no existe, el programa imprime una advertencia, pero permite que el servidor arranque. Así, la ruta de Supabase sigue funcionando aunque la de IA esté inactiva.
+
+Rol del Sistema: En la petición a la IA, definimos un role: "system" que le indica al modelo cómo debe comportarse (en este caso, como un experto en ingeniería), asegurando respuestas más precisas y adaptadas a nuestro proyecto.
+
+###6. Prueba Final en Postman
+Para verificar que la IA está viva y razonando, arranca tu servidor (con Uvicorn o Docker) y dirígete a Postman.
+
+Haz una petición GET a la nueva ruta, enviando tu consulta mediante un parámetro de URL (?pregunta=...). Por ejemplo:
+http://localhost:10000/api/ia/preguntar?pregunta=¿Qué es una API?
+
+Si todo está correcto, recibirás un objeto JSON con la respuesta redactada directamente por el modelo de IA alojado en Azure.
+
+<img width="1344" height="613" alt="resultado final" src="https://github.com/user-attachments/assets/5c56a339-39f2-480a-b491-1a5c933ce7e3" />
+
